@@ -1,0 +1,27 @@
+# Deployment & Credentials
+.env
+.env.template
+.huggingfaceignore
+
+# Large Datasets (GitHub has 100MB file limit)
+Financial Health Data/*.csv
+*.csv
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv
+venv/
+env/
+
+# Project Specific
+zindi_rag_storage/
+test*.py
+extract_*.py
+Financial Health Data/Kolesh_Final_Report.pdf
+
+# OS/System
+.DS_Store
+Thumbs.db

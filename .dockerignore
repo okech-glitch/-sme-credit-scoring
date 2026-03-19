@@ -1,0 +1,15 @@
+# Do NOT upload training data, notebook experiments, or CrewAI agents to the API container
+Financial Health Data/Train.csv
+Financial Health Data/Test.csv
+Financial Health Data/SampleSubmission.csv
+Financial Health Data/*.py
+*.ipynb
+zindi_crew_system.py
+zindi_rag_knowledge_base.py
+zindi_competition_workflow.py
+setup_zindi_system.py
+test*.py
+export_*.py
+.env*
+__pycache__/
+*.pkl.tmp

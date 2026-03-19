@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Financial Health</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f7f9fc;
+            --surface-color: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --text-tertiary: #9ca3af;
+            --border-color: #e5e7eb;
+            --primary-action: #000000;
+            --primary-action-hover: #374151;
+            --focus-ring: rgba(99, 102, 241, 0.5);
+            
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        @media (max-width: 800px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        p.subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 0.375rem;
+        }
+
+        input, select {
+            width: 100%;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.625rem 0.875rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        input:focus, select:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px var(--focus-ring);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        button.submit-btn {
+            width: 100%;
+            background: var(--primary-action);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            margin-top: 1rem;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        button.submit-btn:hover {
+            background: var(--primary-action-hover);
+        }
+
+        button.submit-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-text.loading {
+            visibility: hidden;
+        }
+
+        /* Results Panel */
+        .results-panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-tertiary);
+            margin: auto;
+            font-size: 0.875rem;
+        }
+
+        .empty-state svg {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 0.5rem;
+            stroke: var(--border-color);
+        }
+
+        .result-content {
+            display: none;
+        }
+
+        .result-header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .score-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .score-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        .High { color: var(--success); background: #d1fae5; }
+        .Medium { color: var(--warning); background: #fef3c7; }
+        .Low { color: var(--danger); background: #fee2e2; }
+
+        .progress-bar-container {
+            margin-bottom: 1.25rem;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.375rem;
+            font-weight: 500;
+        }
+
+        .progress-track {
+            height: 6px;
+            background: #f3f4f6;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+
+        .fill-success { background: var(--success); }
+        .fill-warning { background: var(--warning); }
+        .fill-danger { background: var(--danger); }
+
+        .insight-box {
+            background: #f9fafb;
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.8125rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            margin-top: 2rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Input Form -->
+        <div class="card">
+            <div class="header">
+                <h1>Credit Assessment</h1>
+                <p class="subtitle">Enter business parameters to calculate risk classification.</p>
+            </div>
+
+            <form id="scoringForm">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Country</label>
+                        <select id="country" required>
+                            <option value="Kenya">Kenya</option>
+                            <option value="Malawi">Malawi</option>
+                            <option value="Zimbabwe">Zimbabwe</option>
+                            <option value="Eswatini">Eswatini</option>
+                            <option value="Lesotho">Lesotho</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Owner Age</label>
+                        <input type="number" id="owner_age" value="35" min="18" max="100" required>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Monthly Income (USD)</label>
+                        <input type="number" id="personal_income" value="50000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly Expenses (USD)</label>
+                        <input type="number" id="business_expenses" value="20000" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Bank Account</label>
+                    <select id="bank_account">
+                        <option value="Yes">Active account</option>
+                        <option value="No">No account</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Mobile Money</label>
+                    <select id="mobile_money">
+                        <option value="Have now">Active</option>
+                        <option value="Used to have but don't have now">Inactive</option>
+                        <option value="Never had">Never had</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Coverage / Insurance</label>
+                    <select id="insurance">
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                        <option value="Never had" selected>Never had</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span class="btn-text">Run Assessment</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="card results-panel">
+            
+            <div class="empty-state" id="emptyState">
+                <svg fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <p>Submit profile to view risk analytics.</p>
+            </div>
+
+            <div class="result-content" id="resultContent">
+                <div class="result-header">
+                    <div class="score-title">Final Decision</div>
+                    <div class="score-value" id="mainScore">Loading...</div>
+                    <div class="status-badge" id="statusBadge">Loading</div>
+                </div>
+
+                <div class="progress-bar-container">
+                    <div class="progress-label">
+                        <span>Prime (Low Default Risk)</span>
+                        <span id="pctHigh" style="color: var(--text-primary)">0%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill fill-success" id="barHigh" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="progress-bar-container">
+                    <div class="progress-label">
+                        <span>Moderate Risk</span>
+                        <span id="pctMedium" style="color: var(--text-primary)">0%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill fill-warning" id="barMedium" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="progress-bar-container">
+                    <div class="progress-label">
+                        <span>Subprime (High Risk)</span>
+                        <span id="pctLow" style="color: var(--text-primary)">0%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill fill-danger" id="barLow" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="insight-box" id="insightBox">
+                    Analyzing model attributes...
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('scoringForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submitBtn');
+            const btnText = btn.querySelector('.btn-text');
+            const spinner = btn.querySelector('.spinner');
+            
+            btnText.classList.add('loading');
+            spinner.style.display = 'block';
+            btn.disabled = true;
+
+            const payload = {
+                country: document.getElementById('country').value,
+                owner_age: parseInt(document.getElementById('owner_age').value),
+                personal_income: parseFloat(document.getElementById('personal_income').value),
+                business_expenses: parseFloat(document.getElementById('business_expenses').value),
+                features: {
+                    bank_account: document.getElementById('bank_account').value,
+                    mobile_money: document.getElementById('mobile_money').value,
+                    insurance: document.getElementById('insurance').value
+                }
+            };
+
+            try {
+                const endpoint = window.location.origin + '/predict_health_index';
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || "API Request Failed");
+                }
+
+                const data = await response.json();
+                renderResults(data);
+
+            } catch (err) {
+                alert(`Error: ${err.message}`);
+                console.error(err);
+            } finally {
+                btnText.classList.remove('loading');
+                spinner.style.display = 'none';
+                btn.disabled = false;
+            }
+        });
+
+        function renderResults(data) {
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('resultContent').style.display = 'block';
+
+            let mainClass = data.prediction.split(' ')[0]; 
+            
+            const scoreEl = document.getElementById('mainScore');
+            const badgeEl = document.getElementById('statusBadge');
+            
+            scoreEl.textContent = "Approved"; // We re-interpret the classification 
+            if (mainClass === "Low") scoreEl.textContent = "Declined";
+            if (mainClass === "Medium") scoreEl.textContent = "Manual Review";
+
+            badgeEl.textContent = data.prediction;
+            badgeEl.className = 'status-badge ' + mainClass;
+
+            const probs = data.risk_adjusted_probabilities;
+            
+            setTimeout(() => {
+                document.getElementById('barHigh').style.width = (probs.High * 100) + '%';
+                document.getElementById('pctHigh').textContent = (probs.High * 100).toFixed(1) + '%';
+
+                document.getElementById('barMedium').style.width = (probs.Medium * 100) + '%';
+                document.getElementById('pctMedium').textContent = (probs.Medium * 100).toFixed(1) + '%';
+
+                document.getElementById('barLow').style.width = (probs.Low * 100) + '%';
+                document.getElementById('pctLow').textContent = (probs.Low * 100).toFixed(1) + '%';
+            }, 50);
+
+            document.getElementById('insightBox').textContent = data.architect_insight;
+        }
+    </script>
+</body>
+</html>
