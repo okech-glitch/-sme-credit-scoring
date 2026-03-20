@@ -1,35 +1,49 @@
-# SME Credit Scoring & Financial Health Prediction
+# Credit Risk Assessment Engine
+### Alternative Data Scoring for SME Lending in Sub-Saharan Africa
 
-## Project Overview
-This project involved the development and deployment of an end-to-end machine learning system designed to predict the financial health index of Small and Medium Enterprises (SMEs) in emerging markets. The solution transitioned from a raw tabular data challenge to a production-ready API and interactive dashboard.
+An ML-based credit scoring engine that replaces traditional bureau scores with alternative behavioral signals: mobile money transaction frequency, utility payment patterns, and business operating history. 
 
-## Technical Architecture & Modeling
-The core inference engine utilizes a weighted ensemble of Gradient Boosting Decision Trees (GBDTs), specifically LightGBM, CatBoost, and XGBoost. The multi-model approach was designed to minimize variance and improve generalization across diverse macroeconomic regimes.
+This repository includes the core inference engine (88% precision), a secured FastAPI inference endpoint, and a Model Context Protocol (MCP) server that empowers stakeholders to query the portfolio data using natural language AI agents.
 
-- **Data Engineering:** Developed a custom preprocessing pipeline handling high-cardinality categorical variables through target encoding and frequency-based mapping.
-- **Model Performance:** Achieved a Top 10% ranking in the Zindi Financial Health Prediction Challenge (Public Score: 0.8863, Private Score: 0.8718).
-- **Optimization:** Hyperparameters were tuned using Bayesian Optimization (Optuna) to maximize Macro-F1 scores, prioritizing the detection of high-risk "Low" financial health profiles.
+---
 
-## Engineering & Solutions Architect Approach
-A significant challenge in the project was the "Sparsity Bias" encountered during the transition from batch training to real-time inference. Since the training data utilized over 90 survey features while the production UI captures only 7 key metrics, the model initially defaulted to high-risk classifications due to the high volume of missing data.
+## Getting Started
 
-- **Baseline Inversion Strategy:** Implemented a non-trivial data engineering fix by extracting the statistical mode of high-risk profiles into a JSON-based baseline template. Incoming API requests overlay user data onto this baseline, ensuring the model operates within its trained distribution while maintaining strict risk-aversion.
-- **Microservices Deployment:** Architected a FastAPI backend served through a non-root Docker container, ensuring enterprise-grade security and cross-platform portability.
-- **User Interface:** Developed a high-performance Vanilla JavaScript frontend inspired by modern fintech design systems (e.g., Stripe, Brex) to visualize probability distributions and architectural insights.
+### Prerequisites
+- Python 3.10+
+- `pip`
 
-## Deployment & Live Demo
-The system is deployed as a live Docker Space on Hugging Face, utilizing an optimized CI/CD workflow that excludes heavy training datasets in favor of lean inference-only dependencies.
+### 1. Installation
+Clone this repository and install the required dependencies:
 
-- **Live URL:** [https://huggingface.co/spaces/okechobonyo/sme-credit-scoring](https://huggingface.co/spaces/okechobonyo/sme-credit-scoring)
-- **Deployment Platform:** Hugging Face Spaces (Docker SDK)
-- **API Framework:** FastAPI (Python 3.10)
+```bash
+git clone https://github.com/okech-christopher/-sme-credit-scoring.git
+cd -sme-credit-scoring
+pip install -r requirements.txt
+```
 
-## Technical Stack
-- **Languages:** Python, JavaScript, HTML, CSS.
-- **Libraries:** LightGBM, CatBoost, XGBoost, Scikit-Learn, Pandas, Joblib.
-- **Tools:** Docker, Hugging Face CLI, Uvicorn, Pydantic.
+*(Note: Ensure you have `fastapi`, `uvicorn`, `lightgbm`, `pandas`, `scikit-learn`, `shap`, and `mcp` installed in your environment).*
 
-## Key Developer Documentation
-- To run locally: `uvicorn app:app --reload`
-- To train models: `python Financial Health Data/export_api_models.py`
-- To verify API: `python test.py`
+### 2. Running the FastAPI Inference Engine
+The core scoring engine is served via a FastAPI REST interface, secured by a CAPIE-style defensive perimeter.
+
+Start the server:
+```bash
+uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+```
+Once running, you can:
+- View the interactive API docs at `http://localhost:8000/docs`
+- Send POST requests to `/score` with applicant JSON payloads to receive back a default probability and risk tier.
+
+### 3. Running the MCP Server (Conversational Analytics)
+The system includes an MCP (Model Context Protocol) server that exposes the credit portfolio to LLM agents. This allows developers and stakeholders to ask plain English questions about the risk distribution without writing SQL or Python.
+
+Start the MCP server on a different port:
+```bash
+python mcp_credit.py --port 8200
+```
+This exposes 6 tools to AI agents: `score_applicant`, `explain_decision`, `risk_distribution`, `list_applicants`, `compare_applicants`, and `default_by_segment`.
+
+## Live Demo & Stakeholder Report
+- **Live Inference App:** [Hugging Face Space](https://huggingface.co/spaces/okechobonyo/sme-credit-scoring)
+- **Stakeholder Report:** [View the interactive report](https://okech-christopher.github.io/credit_report.html)
